@@ -83,7 +83,8 @@ const App = () => {
         ) {
             return;
         }
-
+        console.log("Destination Droppable ID:", destination.droppableId);
+        
         const newTasks = [...tasks];
         const movedTaskIndex = newTasks.findIndex((task) => task.id === draggableId);
         const [movedTask] = newTasks.splice(movedTaskIndex, 1);
