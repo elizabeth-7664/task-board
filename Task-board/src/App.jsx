@@ -1,24 +1,53 @@
-// App.jsx (or TaskBoard.jsx - assuming this is your main component)
+
 import React, { useState, useEffect } from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import TaskColumn from './components/TaskColumn';
 import NewTaskForm from './components/NewTaskForm';
 import SideBar from './components/SideBar';
 import Settings from './components/Settings';
-import Projects from './components/Projects'; // Import the Projects component
-import * as api from './components/services/api'; // Import all API functions
+import Projects from './components/Projects'; 
+import * as api from './components/services/api'; 
+
+const LOCAL_STORAGE_KEY = 'taskBoardTasks';
 
 const App = () => {
-    const [tasks, setTasks] = useState([]);
+    const [tasks, setTasks] = useState(() => {
+        const storedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
+        return storedTasks ? JSON.parse(storedTasks) : [];
+    });
     const [editingTask, setEditingTask] = useState(null);
     const [activeSidebarItem, setActiveSidebarItem] = useState('Dashboard');
-    const [activeFilter, setActiveFilter] = useState(null); // To track the active filter
+    const [activeFilter, setActiveFilter] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        loadTasksFromLocalStorage();
         fetchTasks();
     }, []);
+
+    useEffect(() => {
+        saveTasksToLocalStorage(tasks);
+    }, [tasks]);
+
+    const loadTasksFromLocalStorage = () => {
+        try {
+            const storedTasks = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (storedTasks) {
+                setTasks(JSON.parse(storedTasks));
+            }
+        } catch (error) {
+            console.error("Error loading tasks from local storage:", error);
+        }
+    };
+
+    const saveTasksToLocalStorage = (currentTasks) => {
+        try {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(currentTasks));
+        } catch (error) {
+            console.error("Error saving tasks to local storage:", error);
+        }
+    };
 
     const fetchTasks = async () => {
         setLoading(true);
@@ -30,6 +59,7 @@ const App = () => {
         } catch (err) {
             setError(err.message);
             setLoading(false);
+            console.error("Error fetching tasks from API:", err);
         }
     };
 
@@ -39,6 +69,8 @@ const App = () => {
             setTasks([...tasks, data]);
         } catch (err) {
             setError(err.message);
+            setTasks([...tasks, { id: `temp-${Date.now()}`, ...newTask }]);
+            console.error("Error adding task to API:", err);
         }
     };
 
@@ -51,9 +83,10 @@ const App = () => {
         try {
             const data = await api.updateTask(updatedTask.id, updatedTask);
             setTasks(tasks.map((task) => (task.id === data.id ? data : task)));
-            setEditingTask(null);
         } catch (err) {
             setError(err.message);
+            setTasks(tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
+            console.error("Error updating task to API:", err);
         }
     };
 
@@ -63,6 +96,8 @@ const App = () => {
             setTasks(tasks.filter((task) => task.id !== taskId));
         } catch (err) {
             setError(err.message);
+            setTasks(tasks.filter((task) => task.id !== taskId));
+            console.error("Error deleting task from API:", err);
         }
     };
 
@@ -83,8 +118,7 @@ const App = () => {
         ) {
             return;
         }
-        console.log("Destination Droppable ID:", destination.droppableId);
-        
+
         const newTasks = [...tasks];
         const movedTaskIndex = newTasks.findIndex((task) => task.id === draggableId);
         const [movedTask] = newTasks.splice(movedTaskIndex, 1);
@@ -97,18 +131,18 @@ const App = () => {
             await api.updateTask(draggableId, { status: destination.droppableId });
         } catch (err) {
             setError(err.message);
-            fetchTasks(); // Revert local state on error
+            console.error("Error updating task status to API:", err);
         }
     };
 
     const handleSidebarItemClick = (itemLabel) => {
         setActiveSidebarItem(itemLabel);
-        setActiveFilter(null); // Reset filter when navigating
+        setActiveFilter(null);
     };
 
     const handleFilterByStatus = (status) => {
         setActiveFilter(status);
-        setActiveSidebarItem(null); // Unselect navigation item
+        setActiveSidebarItem(null);
     };
 
     const filteredTasks = activeFilter
@@ -128,17 +162,28 @@ const App = () => {
                         <NewTaskForm onAddTask={handleAddTask} />
 
                         {editingTask && (
-                            <div>
+                            <>
                                 <h3>Edit Task</h3>
+                                <label htmlFor="edit-title">Title:</label>
                                 <input
                                     type="text"
-                                    value={editingTask.title}
+                                    id="edit-title"
+                                    value={editingTask.title || ''}
                                     onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })}
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2 mb-2"
                                 />
+                                <label htmlFor="edit-description">Description:</label>
+                                <textarea
+                                    id="edit-description"
+                                    value={editingTask.description || ''}
+                                    onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2 mb-2"
+                                />
+                                <label htmlFor="edit-tags">Tags (comma separated):</label>
                                 <input
                                     type="text"
-                                    placeholder="Tags (comma separated)"
+                                    id="edit-tags"
+                                    placeholder="tags, separated by commas"
                                     value={editingTask.tags ? editingTask.tags.join(', ') : ''}
                                     onChange={(e) => setEditingTask({ ...editingTask, tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '') })}
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2 mb-2"
@@ -155,7 +200,7 @@ const App = () => {
                                 >
                                     Cancel
                                 </button>
-                            </div>
+                            </>
                         )}
 
                         {loading ? (
@@ -192,46 +237,13 @@ const App = () => {
                     </>
                 );
             case 'Projects':
-                return <Projects />; // Render the Projects component
+                return <Projects />;
             case 'Settings':
                 return <Settings />;
             default:
-                return (
-                    <>
-                        <h2 className="text-2xl font-semibold mb-4">Task Board</h2>
-                        {loading ? (
-                            <p>Loading tasks...</p>
-                        ) : error ? (
-                            <p className="text-red-500">Error loading tasks: {error}</p>
-                        ) : (
-                            <DragDropContext onDragEnd={onDragEnd}>
-                                <div className="flex gap-4">
-                                    <TaskColumn
-                                        title="To Do"
-                                        tasks={toDoTasks}
-                                        onEditTask={handleEditTask}
-                                        onDeleteTask={handleDeleteTask}
-                                        onTaskClick={handleTaskClick}
-                                    />
-                                    <TaskColumn
-                                        title="In Progress"
-                                        tasks={inProgressTasks}
-                                        onEditTask={handleEditTask}
-                                        onDeleteTask={handleDeleteTask}
-                                        onTaskClick={handleTaskClick}
-                                    />
-                                    <TaskColumn
-                                        title="Done"
-                                        tasks={doneTasks}
-                                        onEditTask={handleEditTask}
-                                        onDeleteTask={handleDeleteTask}
-                                        onTaskClick={handleTaskClick}
-                                    />
-                                </div>
-                            </DragDropContext>
-                        )}
-                    </>
-                );
+                
+                    
+                
         }
     };
 

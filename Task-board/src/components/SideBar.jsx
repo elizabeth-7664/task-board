@@ -1,4 +1,4 @@
-// SideBar.jsx
+
 import React from 'react';
 
 const SideBar = ({ onItemClick }) => {

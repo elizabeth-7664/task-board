@@ -1,4 +1,4 @@
-// taskcard.jsx
+
 import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 
@@ -47,7 +47,7 @@ const TaskCard = ({ task, index, onEdit, onDelete, onClick }) => (
                         ))}
                     </div>
                 )}
-                {/* You can add more task details here */}
+                {}
             </div>
         )}
     </Draggable>

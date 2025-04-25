@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const NewTaskForm = ({ onAddTask }) => {
     const [title, setTitle] = useState('');
     const [tags, setTags] = useState('');
-    const [status, setStatus] = useState('toDo'); // Default to 'toDo'
+    const [status, setStatus] = useState('toDo'); 
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -12,7 +12,7 @@ const NewTaskForm = ({ onAddTask }) => {
             onAddTask({ title, tags: tagsArray, status });
             setTitle('');
             setTags('');
-            setStatus('toDo'); // Reset status after adding
+            setStatus('toDo');
         }
     };
 

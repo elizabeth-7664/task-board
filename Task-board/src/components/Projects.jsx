@@ -1,4 +1,4 @@
-// Projects.jsx
+
 import React, { useState, useEffect } from 'react';
 import * as api from "./services/api";
 
@@ -44,7 +44,7 @@ const Projects = () => {
             ) : (
                 <p>No projects available.</p>
             )}
-            {/* You can add UI here to create new projects, etc. */}
+            {}
         </div>
     );
 };

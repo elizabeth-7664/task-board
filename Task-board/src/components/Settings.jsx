@@ -1,4 +1,4 @@
-// Settings.jsx
+
 import React, { useState, useEffect } from 'react';
 
 const Settings = () => {
@@ -34,12 +34,12 @@ const Settings = () => {
                     >
                         <option value="light">Light</option>
                         <option value="dark">Dark</option>
-                        {/* Add more theme options */}
+                        {}
                     </select>
                 </div>
-                {/* Add more settings options here */}
+                {}
             </div>
-            {/* You can add more sections for different settings */}
+            {}
         </div>
     );
 };
