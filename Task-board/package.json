@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "npm run dev",
+    "server": "npm run server"
   },
   "dependencies": {
     "@heroicons/react": "^1.0.6",
