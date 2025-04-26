@@ -2,79 +2,74 @@
 
 ## Overview
 
-This is a simple task management application that allows users to organize their tasks into different statuses: "To Do", "In Progress", and "Done". It features drag-and-drop functionality for easy task movement between columns and persists task data using both a Mock API for remote storage and local storage for offline access and improved performance. Users can also add, edit, and delete tasks, and categorize them using tags.
+This is a web-based task management application that allows users to organize and track their tasks across different stages: To Do, In Progress, and Done. It provides a drag-and-drop interface for easy task management and includes features for creating, editing, deleting, filtering, searching, and sorting tasks.
 
-## Core Features
+## Key Features
 
-* **Task Management by Status:** Organize tasks into "To Do", "In Progress", and "Done" columns.
-* **Add, Edit, and Delete Tasks:** Create new tasks, modify existing ones, and remove tasks as needed.
-* **Drag-and-Drop Functionality:** Move tasks seamlessly between different status columns using drag and drop.
-* **Local Storage Persistence:** Tasks are stored in the browser's local storage, allowing for offline access and faster loading.
-* **Mock API Integration:** Utilizes MockAPI.io to simulate a backend for persistent storage and data synchronization.
-* **Task Categorization:** Add and view tags or labels associated with each task.
+* **Task Creation:** Users can add new tasks with a title, optional tags (comma-separated), an initial status (To Do, In Progress, Done), and a due date.
+* **Task Display:** Tasks are displayed in three columns representing their status: "To Do," "In Progress," and "Done."
+* **Drag and Drop:** Tasks can be easily moved between columns using drag and drop to update their status.
+* **Task Editing:** Users can edit the title, description, tags, and due date of existing tasks.
+* **Task Deletion:** Users can delete tasks.
+* **Filtering:**
+    * **Status Filtering:** Users can filter tasks by their status using the sidebar navigation.
+    * **Tag Filtering:** Users can filter tasks by entering tags in the "Filter by tag" input field.
+* **Searching:** Users can search for tasks by title, description, or tags using the "Search tasks..." input field.
+* **Sorting:** Users can sort tasks by:
+    * Title (A-Z and Z-A)
+    * Due Date (Earliest and Latest)
+* **Due Dates:**
+    * Users can set a due date for each task.
+    * Due dates are displayed on the task cards.
+    * Approaching due dates (within 2 days) and overdue dates are visually highlighted.
+* **Visual Status:** Each task card has a colored indicator on the left side representing its status (blue for To Do, yellow for In Progress, green for Done).
+* **Column Distinction:** The "To Do," "In Progress," and "Done" columns have distinct light background colors for better visual organization.
+* **Local Storage:** Tasks are saved to local storage, so they persist across browser sessions.
+* **API Integration:** The application interacts with a backend API to fetch, add, update, and delete tasks.
 
 ## Technologies Used
 
-* **React:** A JavaScript library for building user interfaces.
-* **react-beautiful-dnd:** A library for creating beautiful and accessible drag and drop interfaces.
-* **MockAPI.io:** A service for creating mock REST APIs for development and testing.
-* **Tailwind CSS:** A utility-first CSS framework for rapid styling.
-* **JavaScript (ES6+)**
-* **HTML**
+* React
+* React Beautiful Dnd
+* Tailwind CSS
+* date-fns (for date manipulation and comparison)
+* [List any other libraries or frameworks you used]
 
-## Live Demo
-
-
-
-## Setup and Installation
+## Setup Instructions
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository_url>
-    cd <repository_directory>
+    git clone [your-repository-url]
+    cd [your-repository-name]
     ```
-
 2.  **Install dependencies:**
     ```bash
     npm install
-    # or
-    yarn install
     ```
-
 3.  **Start the development server:**
     ```bash
-    npm run dev
-    # or
-    yarn dev
+    npm start
     ```
+    This will run the application in your browser, usually at `http://localhost:3000`.
 
-    This will typically start the application at `http://localhost:5173/`.
+## API Endpoints
 
-## Mock API Setup
+The application communicates with the following API endpoints:
 
-This application uses MockAPI.io for backend simulation. To ensure it works correctly:
-
-1.  Go to [https://mockapi.io/](https://mockapi.io/) and create a new project if you haven't already.
-2.  Within your project, create a resource named `tasks`.
-3.  Define the properties for your `tasks` resource (e.g., `id`, `title`, `status`, `tags`).
-4.  (Optional) Add some initial task data in the "Data" section of your `tasks` resource to have some tasks displayed when the application first loads. Example data:
-
-    ```json
-    [
-      { "id": "1", "title": "Example Task 1", "status": "toDo", "tags": ["example"] },
-      { "id": "2", "title": "Another Task", "status": "inprogress", "tags": ["sample"] }
-    ]
-    ```
-
-5.  Ensure that the API base URL used in your `src/api.js` file (or wherever your API functions are defined) matches the base URL provided by MockAPI for your project.
+* `GET /api/v1/tasks`: Fetches all tasks.
+* `POST /api/v1/tasks`: Adds a new task.
+* `PUT /api/v1/tasks/:id`: Updates an existing task.
+* `DELETE /api/v1/tasks/:id`: Deletes a task.
+* `GET /api/v1/projects`: Fetches all projects.
+    * [Add other project-related endpoints if applicable]
 
 ## Local Storage
 
-The application utilizes the browser's local storage to persist task data. You can observe the stored data in your browser's developer tools under the "Application" or "Storage" tab.
+The application uses local storage with the key `taskBoardTasks` to persist task data in the browser.
 
-## Contributing
+## Further Improvements
 
-Contributions to this project are welcome. Please feel free to fork the repository, create a branch with your changes, and submit a pull request.
+* user authentication, more advanced filtering/sorting options, priority levels, notifications.
 
-## License
+
 
