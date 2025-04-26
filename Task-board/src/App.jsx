@@ -182,7 +182,7 @@ const App = () => {
             return 0;
         });
     console.log('filteredAndSortedTasks:', filteredAndSortedTasks);
-    const toDoTasks = filteredAndSortedTasks.filter((task) => task.status === 'toDo');
+    const toDoTasks = filteredAndSortedTasks.filter((task) => task.status === 'todo');
     const inProgressTasks = filteredAndSortedTasks.filter((task) => task.status === 'inprogress');
     const doneTasks = filteredAndSortedTasks.filter((task) => task.status === 'done');
 
