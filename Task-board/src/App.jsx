@@ -1,12 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { DragDropContext } from 'react-beautiful-dnd';
 import TaskColumn from './components/TaskColumn';
 import NewTaskForm from './components/NewTaskForm';
 import SideBar from './components/SideBar';
 import Settings from './components/Settings';
-import Projects from './components/Projects'; 
-import * as api from './components/services/api'; 
+import Projects from './components/Projects';
+import * as api from './components/services/api';
 
 const LOCAL_STORAGE_KEY = 'taskBoardTasks';
 
@@ -20,6 +19,9 @@ const App = () => {
     const [activeFilter, setActiveFilter] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [filterTag, setFilterTag] = useState('');
+    const [sortBy, setSortBy] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         loadTasksFromLocalStorage();
@@ -66,23 +68,26 @@ const App = () => {
     const handleAddTask = async (newTask) => {
         try {
             const data = await api.addTask(newTask);
+            console.log('API Response:', data);
             setTasks([...tasks, data]);
+            console.log('Tasks state after adding:', tasks);
         } catch (err) {
             setError(err.message);
             setTasks([...tasks, { id: `temp-${Date.now()}`, ...newTask }]);
             console.error("Error adding task to API:", err);
+            console.log('Tasks state after adding (temporary):', tasks);
         }
     };
 
     const handleEditTask = (taskToEdit) => {
         setEditingTask(taskToEdit);
-        alert(`Editing task: ${taskToEdit.title} (ID: ${taskToEdit.id})`);
     };
 
     const handleUpdateTask = async (updatedTask) => {
         try {
             const data = await api.updateTask(updatedTask.id, updatedTask);
             setTasks(tasks.map((task) => (task.id === data.id ? data : task)));
+            setEditingTask(null);
         } catch (err) {
             setError(err.message);
             setTasks(tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
@@ -138,20 +143,48 @@ const App = () => {
     const handleSidebarItemClick = (itemLabel) => {
         setActiveSidebarItem(itemLabel);
         setActiveFilter(null);
+        setFilterTag('');
+        setSortBy('');
+        setSearchTerm('');
     };
 
     const handleFilterByStatus = (status) => {
         setActiveFilter(status);
         setActiveSidebarItem(null);
+        setFilterTag('');
+        setSortBy('');
+        setSearchTerm('');
     };
 
-    const filteredTasks = activeFilter
-        ? tasks.filter((task) => task.status === activeFilter)
-        : tasks;
-
-    const toDoTasks = filteredTasks.filter((task) => task.status === 'toDo');
-    const inProgressTasks = filteredTasks.filter((task) => task.status === 'inprogress');
-    const doneTasks = filteredTasks.filter((task) => task.status === 'done');
+    const filteredAndSortedTasks = [...tasks]
+        .filter(task =>
+            (activeFilter === null || task.status === activeFilter) &&
+            (filterTag === '' || (task.tags && task.tags.some(tag => tag.toLowerCase().includes(filterTag.toLowerCase())))) &&
+            (searchTerm === '' ||
+                task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (task.description && task.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (task.tags && task.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))))
+        )
+        .sort((a, b) => {
+            if (sortBy === 'title-asc') {
+                return a.title.localeCompare(b.title);
+            } else if (sortBy === 'title-desc') {
+                return b.title.localeCompare(a.title);
+            } else if (sortBy === 'dueDate-asc') {
+                const dateA = a.dueDate ? new Date(a.dueDate) : new Date('9999-12-31');
+                const dateB = b.dueDate ? new Date(b.dueDate) : new Date('9999-12-31');
+                return dateA - dateB;
+            } else if (sortBy === 'dueDate-desc') {
+                const dateA = a.dueDate ? new Date(a.dueDate) : new Date('1970-01-01');
+                const dateB = b.dueDate ? new Date(b.dueDate) : new Date('1970-01-01');
+                return dateB - dateA;
+            }
+            return 0;
+        });
+    console.log('filteredAndSortedTasks:', filteredAndSortedTasks);
+    const toDoTasks = filteredAndSortedTasks.filter((task) => task.status === 'toDo');
+    const inProgressTasks = filteredAndSortedTasks.filter((task) => task.status === 'inprogress');
+    const doneTasks = filteredAndSortedTasks.filter((task) => task.status === 'done');
 
     const renderContent = () => {
         switch (activeSidebarItem) {
@@ -161,8 +194,37 @@ const App = () => {
                         <h2 className="text-2xl font-semibold mb-4">Task Board</h2>
                         <NewTaskForm onAddTask={handleAddTask} />
 
+                        <div className="mb-4 flex items-center space-x-4">
+                            <input
+                                type="text"
+                                placeholder="Search tasks..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="shadow appearance-none border rounded w-1/3 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Filter by tag"
+                                value={filterTag}
+                                onChange={(e) => setFilterTag(e.target.value)}
+                                className="shadow appearance-none border rounded w-1/4 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            />
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="shadow border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            >
+                                <option value="">Sort By</option>
+                                <option value="title-asc">Title (A-Z)</option>
+                                <option value="title-desc">Title (Z-A)</option>
+                                <option value="dueDate-asc">Due Date (Earliest)</option>
+                                <option value="dueDate-desc">Due Date (Latest)</option>
+                            </select>
+                        </div>
+
                         {editingTask && (
                             <>
+                                {}
                                 <h3>Edit Task</h3>
                                 <label htmlFor="edit-title">Title:</label>
                                 <input
@@ -188,6 +250,14 @@ const App = () => {
                                     onChange={(e) => setEditingTask({ ...editingTask, tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag !== '') })}
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2 mb-2"
                                 />
+                                <label htmlFor="edit-dueDate">Due Date:</label>
+                                <input
+                                    type="date"
+                                    id="edit-dueDate"
+                                    value={editingTask.dueDate || ''}
+                                    onChange={(e) => setEditingTask({ ...editingTask, dueDate: e.target.value })}
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2 mb-2"
+                                />
                                 <button
                                     onClick={() => handleUpdateTask(editingTask)}
                                     className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
@@ -210,27 +280,33 @@ const App = () => {
                         ) : (
                             <DragDropContext onDragEnd={onDragEnd}>
                                 <div className="flex gap-4">
-                                    <TaskColumn
-                                        title="To Do"
-                                        tasks={toDoTasks}
-                                        onEditTask={handleEditTask}
-                                        onDeleteTask={handleDeleteTask}
-                                        onTaskClick={handleTaskClick}
-                                    />
-                                    <TaskColumn
-                                        title="In Progress"
-                                        tasks={inProgressTasks}
-                                        onEditTask={handleEditTask}
-                                        onDeleteTask={handleDeleteTask}
-                                        onTaskClick={handleTaskClick}
-                                    />
-                                    <TaskColumn
-                                        title="Done"
-                                        tasks={doneTasks}
-                                        onEditTask={handleEditTask}
-                                        onDeleteTask={handleDeleteTask}
-                                        onTaskClick={handleTaskClick}
-                                    />
+                                    <div className="w-80 min-h-[200px] rounded p-4" style={{ backgroundColor: '#f0f9ff' }}>
+                                        <TaskColumn
+                                            title="To Do"
+                                            tasks={toDoTasks}
+                                            onEditTask={handleEditTask}
+                                            onDeleteTask={handleDeleteTask}
+                                            onTaskClick={handleTaskClick}
+                                        />
+                                    </div>
+                                    <div className="w-80 min-h-[200px] rounded p-4" style={{ backgroundColor: '#fef3c7' }}>
+                                        <TaskColumn
+                                            title="In Progress"
+                                            tasks={inProgressTasks}
+                                            onEditTask={handleEditTask}
+                                            onDeleteTask={handleDeleteTask}
+                                            onTaskClick={handleTaskClick}
+                                        />
+                                    </div>
+                                    <div className="w-80 min-h-[200px] rounded p-4" style={{ backgroundColor: '#ecfdf5' }}>
+                                        <TaskColumn
+                                            title="Done"
+                                            tasks={doneTasks}
+                                            onEditTask={handleEditTask}
+                                            onDeleteTask={handleDeleteTask}
+                                            onTaskClick={handleTaskClick}
+                                        />
+                                    </div>
                                 </div>
                             </DragDropContext>
                         )}
@@ -241,9 +317,7 @@ const App = () => {
             case 'Settings':
                 return <Settings />;
             default:
-                
-                    
-                
+                return null;
         }
     };
 

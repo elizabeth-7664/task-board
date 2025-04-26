@@ -1,4 +1,4 @@
-// api.js
+
 const BASE_URL_TASKS = 'https://68076032e81df7060eb9f118.mockapi.io/api/v1/tasks';
 const BASE_URL_PROJECTS = 'https://68076032e81df7060eb9f118.mockapi.io/api/v1/projects';
 
@@ -71,7 +71,7 @@ export const deleteTask = async (id) => {
     }
 };
 
-// --- Project API Calls ---
+
 
 export const fetchProjects = async () => {
     try {
@@ -87,4 +87,3 @@ export const fetchProjects = async () => {
     }
 };
 
-// Add more project-related API calls here (e.g., createProject, etc.) if needed
