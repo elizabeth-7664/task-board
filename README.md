@@ -39,8 +39,8 @@ This is a web-based task management application that allows users to organize an
 
 1.  **Clone the repository:**
     ```bash
-    git clone [my-repository-url]
-    cd [my-repository-name]
+    git clone [https://github.com/elizabeth-7664/task-board]
+    cd [task-board]
     ```
 2.  **Install dependencies:**
     ```bash
