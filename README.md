@@ -33,7 +33,11 @@ This is a web-based task management application that allows users to organize an
 * React Beautiful Dnd
 * Tailwind CSS
 * date-fns (for date manipulation and comparison)
-  
+* 
+## Links
+
+* **GitHub Repository:** [https://github.com/elizabeth-7664/task-board](https://github.com/elizabeth-7664/task-board)
+* **Live Demo (Vercel):** [https://task-board-2-cnxxficwy-elizabeth-7664s-projects.vercel.app](https://task-board-2-cnxxficwy-elizabeth-7664s-projects.vercel.app)  
 
 ## Setup Instructions
 
